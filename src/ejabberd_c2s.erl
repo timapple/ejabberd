@@ -388,6 +388,7 @@ sasl_mechanisms(Mechs, #{lserver := LServer} = State) ->
 	 (<<"PLAIN">>) -> true;
 	 (<<"X-OAUTH2">>) -> [ejabberd_auth_anonymous] /= ejabberd_auth:auth_modules(LServer);
 	 (<<"EXTERNAL">>) -> maps:get(tls_verify, State, false);
+     (<<"GSSAPI">>) -> true;
 	 (_) -> false
       end, Mechs -- Mechs1).
 
