@@ -405,6 +405,13 @@ check_password_fun(<<"X-OAUTH2">>, #{lserver := LServer}) ->
 		_ -> {false, ejabberd_oauth}
 	    end
     end;
+check_password_fun(<<"GSSAPI">>, #{lserver := LServer}) ->
+    fun(User, _AuthzId, _P) ->
+        case ejabberd_auth:user_exists_with_authmodule(User, LServer) of
+            {true, M} -> {true, M};
+            _ -> {false, undefined}
+        end
+    end;
 check_password_fun(_Mech, #{lserver := LServer}) ->
     fun(U, AuthzId, P) ->
 	    ejabberd_auth:check_password_with_authmodule(U, AuthzId, LServer, P)

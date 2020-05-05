@@ -38,7 +38,7 @@
 	 count_users/1, import/5, import_start/2,
 	 count_users/2, get_password/2,
 	 get_password_s/2, get_password_with_authmodule/2,
-	 user_exists/2, user_exists_in_other_modules/3,
+	 user_exists/2, user_exists_with_authmodule/2, user_exists_in_other_modules/3,
 	 remove_user/2, remove_user/3, plain_password_required/1,
 	 store_type/1, entropy/1, backend_type/1, password_format/1,
 	 which_users_exists/1]).
@@ -402,6 +402,29 @@ user_exists(User, Server) ->
 	      end, auth_modules(LServer));
 	_ ->
 	    false
+    end.
+
+-spec user_exists_with_authmodule(binary(), binary()) -> {boolean(), module()}.
+user_exists_with_authmodule(_User, <<"">>) ->
+    {false, undefined};
+user_exists_with_authmodule(User, Server) ->
+    case validate_credentials(User, Server) of
+        {ok, LUser, LServer} ->
+            case lists:foldl(
+                    fun(M, {error, _}) ->
+                        case db_user_exists(LUser, LServer, M) of
+                            {error, _} -> {false, M};
+                            Else -> {Else, M}
+                        end;
+                       (_M, Acc) -> Acc
+                    end, {error, undefined}, auth_modules(LServer)) of
+                {true, Module} ->
+                    {true, Module};
+                _ ->
+                    {false, undefined}
+            end;
+        _ ->
+            {false, undefined}
     end.
 
 -spec user_exists_in_other_modules(atom(), binary(), binary()) -> boolean() | maybe.
