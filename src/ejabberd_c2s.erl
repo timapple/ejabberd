@@ -389,7 +389,7 @@ sasl_mechanisms(Mechs, #{lserver := LServer} = State) ->
 	 (<<"X-OAUTH2">>) -> [ejabberd_auth_anonymous] /= ejabberd_auth:auth_modules(LServer);
 	 (<<"EXTERNAL">>) -> maps:get(tls_verify, State, false);
 	 (<<"GSSAPI">>) -> true;
-	 (<<"SPNEGO">>) -> true;
+	 (<<"GSS-SPNEGO">>) -> true;
 	 (_) -> false
       end, Mechs -- Mechs1).
 
@@ -407,7 +407,7 @@ check_password_fun(<<"X-OAUTH2">>, #{lserver := LServer}) ->
 	    end
     end;
 check_password_fun(_Mech, #{lserver := LServer}) when _Mech == <<"GSSAPI">> 
-                                               orelse _Mech == <<"SPNEGO">> ->
+                                               orelse _Mech == <<"GSS-SPNEGO">> ->
     fun(User, _AuthzId, _P) ->
         case ejabberd_auth:user_exists_with_authmodule(User, LServer) of
             {true, M} -> {true, M};
